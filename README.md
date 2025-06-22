@@ -83,6 +83,7 @@ REVIEWBOT_LLM_BACKEND=openwebui  # or 'llamacpp'
 
 # OpenWebUI configuration (external)
 REVIEWBOT_LLM_OPENWEBUI_URL=http://host.docker.internal:3000
+REVIEWBOT_LLM_OPENWEBUI_API_KEY=your_api_key_here  # Optional
 REVIEWBOT_LLM_MODEL_NAME=llama2
 REVIEWBOT_LLM_MAX_TOKENS=1000
 REVIEWBOT_LLM_TEMPERATURE=0.1

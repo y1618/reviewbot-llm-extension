@@ -12,6 +12,7 @@ services:
       # LLM Extension configuration - connect to external OpenWebUI
       - REVIEWBOT_LLM_BACKEND=openwebui
       - REVIEWBOT_LLM_OPENWEBUI_URL=http://host.docker.internal:3000
+      - REVIEWBOT_LLM_OPENWEBUI_API_KEY=your_api_key_here
       - REVIEWBOT_LLM_MODEL_NAME=llama2
       - REVIEWBOT_LLM_MAX_TOKENS=1000
       - REVIEWBOT_LLM_TEMPERATURE=0.1

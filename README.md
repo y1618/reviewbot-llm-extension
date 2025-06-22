@@ -64,12 +64,14 @@ Configure the tool in Review Board with the following options:
 
 ## Docker Configuration
 
-The Docker setup includes:
+### Basic Setup (External OpenWebUI/Ollama)
+
+The default Docker setup includes only:
 
 - **reviewbot-llm**: Main ReviewBot container with LLM extension
-- **openwebui**: Web interface for LLM interaction
-- **ollama**: Local LLM runtime
 - **redis**: Message broker for ReviewBot
+
+This setup assumes you're running OpenWebUI and Ollama separately on your host system.
 
 ### Environment Variables
 
@@ -79,18 +81,34 @@ Configure the LLM extension using environment variables:
 # Backend selection
 REVIEWBOT_LLM_BACKEND=openwebui  # or 'llamacpp'
 
-# OpenWebUI configuration
-REVIEWBOT_LLM_OPENWEBUI_URL=http://openwebui:3000
+# OpenWebUI configuration (external)
+REVIEWBOT_LLM_OPENWEBUI_URL=http://host.docker.internal:3000
 REVIEWBOT_LLM_MODEL_NAME=llama2
 REVIEWBOT_LLM_MAX_TOKENS=1000
 REVIEWBOT_LLM_TEMPERATURE=0.1
 ```
 
-### Docker Compose Services
+### Deployment Options
 
-- **OpenWebUI**: Accessible at http://localhost:3000
-- **Ollama**: API at http://localhost:11434
+#### Option 1: External OpenWebUI/Ollama (Recommended)
+```bash
+# Start your OpenWebUI and Ollama separately
+# Then run ReviewBot LLM extension
+docker-compose up -d
+```
+
+#### Option 2: Full Stack (All-in-One)
+Uncomment the OpenWebUI and Ollama services in docker-compose.yml:
+```bash
+# Edit docker-compose.yml to uncomment OpenWebUI/Ollama services
+docker-compose up -d
+```
+
+### Service Access
+
 - **Redis**: Message broker at localhost:6379
+- **OpenWebUI**: Your external instance (typically http://localhost:3000)
+- **Ollama**: Your external instance (typically http://localhost:11434)
 
 ## Supported Environments
 

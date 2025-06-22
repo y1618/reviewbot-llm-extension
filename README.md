@@ -14,6 +14,24 @@ A ReviewBot extension that performs automated code reviews using local Large Lan
 
 ## Installation
 
+### Docker Installation (Recommended)
+
+The easiest way to use the ReviewBot LLM extension is with Docker, extending the official `beanbag/reviewbot-base` image:
+
+```bash
+# Clone the repository
+git clone https://github.com/y1618/reviewbot-llm-extension.git
+cd reviewbot-llm-extension
+
+# Build the Docker image
+docker build -t reviewbot-llm .
+
+# Run with docker-compose (includes OpenWebUI and Ollama)
+docker-compose up -d
+```
+
+### Manual Installation
+
 1. Clone this repository:
 ```bash
 git clone https://github.com/y1618/reviewbot-llm-extension.git
@@ -44,11 +62,49 @@ Configure the tool in Review Board with the following options:
 - **Max Tokens**: Maximum tokens for LLM response (default: 1000)
 - **Temperature**: Temperature for LLM response (0.0-1.0, lower = more focused, default: 0.1)
 
+## Docker Configuration
+
+The Docker setup includes:
+
+- **reviewbot-llm**: Main ReviewBot container with LLM extension
+- **openwebui**: Web interface for LLM interaction
+- **ollama**: Local LLM runtime
+- **redis**: Message broker for ReviewBot
+
+### Environment Variables
+
+Configure the LLM extension using environment variables:
+
+```bash
+# Backend selection
+REVIEWBOT_LLM_BACKEND=openwebui  # or 'llamacpp'
+
+# OpenWebUI configuration
+REVIEWBOT_LLM_OPENWEBUI_URL=http://openwebui:3000
+REVIEWBOT_LLM_MODEL_NAME=llama2
+REVIEWBOT_LLM_MAX_TOKENS=1000
+REVIEWBOT_LLM_TEMPERATURE=0.1
+```
+
+### Docker Compose Services
+
+- **OpenWebUI**: Accessible at http://localhost:3000
+- **Ollama**: API at http://localhost:11434
+- **Redis**: Message broker at localhost:6379
+
+## Supported Environments
+
+- **SCM**: Git, Subversion, Mercurial (SCM-independent design)
+- **Languages**: Python, JavaScript, TypeScript, Java, C/C++, Go, Rust, Ruby, PHP
+- **Frameworks**: ROS2, standard Python projects
+- **Deployment**: Docker, bare metal, cloud environments
+
 ## Requirements
 
 - ReviewBot
 - requests (for OpenWebUI integration)
 - llama-cpp-python (for local llamacpp execution)
+- Docker and docker-compose (for containerized deployment)
 
 ## Usage
 

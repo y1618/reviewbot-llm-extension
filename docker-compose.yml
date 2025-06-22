@@ -1,0 +1,65 @@
+version: '3.8'
+
+services:
+  reviewbot-llm:
+    build: .
+    container_name: reviewbot-llm
+    environment:
+      # ReviewBot configuration
+      - REVIEWBOT_BROKER_URL=redis://redis:6379/0
+      - REVIEWBOT_RESULT_BACKEND=redis://redis:6379/0
+      
+      # LLM Extension configuration
+      - REVIEWBOT_LLM_BACKEND=openwebui
+      - REVIEWBOT_LLM_OPENWEBUI_URL=http://openwebui:3000
+      - REVIEWBOT_LLM_MODEL_NAME=llama2
+      - REVIEWBOT_LLM_MAX_TOKENS=1000
+      - REVIEWBOT_LLM_TEMPERATURE=0.1
+    depends_on:
+      - redis
+      - openwebui
+    volumes:
+      # Mount for local model files if using llamacpp
+      - ./models:/app/models
+    networks:
+      - reviewbot-network
+
+  openwebui:
+    image: ghcr.io/open-webui/open-webui:main
+    container_name: openwebui
+    ports:
+      - "3000:8080"
+    environment:
+      - OLLAMA_BASE_URL=http://ollama:11434
+    volumes:
+      - openwebui-data:/app/backend/data
+    depends_on:
+      - ollama
+    networks:
+      - reviewbot-network
+
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama-data:/root/.ollama
+    networks:
+      - reviewbot-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: redis
+    ports:
+      - "6379:6379"
+    networks:
+      - reviewbot-network
+
+volumes:
+  openwebui-data:
+  ollama-data:
+
+networks:
+  reviewbot-network:
+    driver: bridge

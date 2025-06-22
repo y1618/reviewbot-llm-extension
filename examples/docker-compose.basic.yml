@@ -1,0 +1,42 @@
+# Basic docker-compose example for ReviewBot LLM Extension
+# External OpenWebUI and llamacpp servers
+
+version: '3.8'
+
+services:
+  reviewbot-llm:
+    build: .
+    environment:
+      # Backend selection
+      - REVIEWBOT_LLM_BACKEND=openwebui
+      
+      # OpenWebUI configuration
+      - REVIEWBOT_LLM_OPENWEBUI_URL=http://host.docker.internal:3000
+      - REVIEWBOT_LLM_OPENWEBUI_API_KEY=your_api_key_here  # Optional
+      
+      # llamacpp configuration (when backend=llamacpp)
+      - REVIEWBOT_LLM_LLAMACPP_URL=http://host.docker.internal:8080
+      - REVIEWBOT_LLM_LLAMACPP_API_KEY=your_api_key_here  # Optional
+      
+      # Model configuration
+      - REVIEWBOT_LLM_MODEL_NAME=llama2
+      - REVIEWBOT_LLM_MAX_TOKENS=1000
+      - REVIEWBOT_LLM_TEMPERATURE=0.1
+      
+      # Custom instructions (inline)
+      - REVIEWBOT_LLM_CUSTOM_INSTRUCTIONS=PEP 8に従ってください。エラーハンドリングを適切に実装してください。
+      
+      # Review Board configuration
+      - REVIEWBOARD_URL=http://your-reviewboard-server
+      - REVIEWBOARD_USERNAME=reviewbot
+      - REVIEWBOARD_PASSWORD=your_password
+      
+    depends_on:
+      - redis
+    restart: unless-stopped
+
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    restart: unless-stopped

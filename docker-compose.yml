@@ -16,6 +16,7 @@ services:
       - REVIEWBOT_LLM_MODEL_NAME=llama2
       - REVIEWBOT_LLM_MAX_TOKENS=1000
       - REVIEWBOT_LLM_TEMPERATURE=0.1
+      - REVIEWBOT_LLM_CUSTOM_INSTRUCTIONS=Follow PEP 8 for Python code. Use meaningful variable names. Add docstrings to all functions.
     depends_on:
       - redis
     volumes:

@@ -61,6 +61,7 @@ Configure the tool in Review Board with the following options:
 ### General Settings
 - **Max Tokens**: Maximum tokens for LLM response (default: 1000)
 - **Temperature**: Temperature for LLM response (0.0-1.0, lower = more focused, default: 0.1)
+- **Custom Instructions**: Project-specific coding rules and guidelines for the LLM to follow (optional)
 
 ## Docker Configuration
 
@@ -87,6 +88,7 @@ REVIEWBOT_LLM_OPENWEBUI_API_KEY=your_api_key_here  # Optional
 REVIEWBOT_LLM_MODEL_NAME=llama2
 REVIEWBOT_LLM_MAX_TOKENS=1000
 REVIEWBOT_LLM_TEMPERATURE=0.1
+REVIEWBOT_LLM_CUSTOM_INSTRUCTIONS="Follow PEP 8 for Python code. Use meaningful variable names."  # Optional
 ```
 
 ### Deployment Options

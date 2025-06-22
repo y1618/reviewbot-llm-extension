@@ -62,6 +62,16 @@ class LLMTool(BaseTool):
             },
         },
         {
+            'name': 'custom_instructions',
+            'field_type': 'django.forms.CharField',
+            'default': '',
+            'field_options': {
+                'widget': 'django.forms.Textarea',
+                'help_text': 'Custom coding rules and instructions for the LLM review (optional)',
+                'required': False,
+            },
+        },
+        {
             'name': 'temperature',
             'field_type': 'django.forms.FloatField',
             'default': 0.1,
@@ -105,14 +115,23 @@ class LLMTool(BaseTool):
     def _generate_review_prompt(self, content, path):
         """Generate a comprehensive code review prompt."""
         file_extension = path.split('.')[-1] if '.' in path else 'unknown'
+        custom_instructions = self.settings.get('custom_instructions', '').strip()
         
-        return f"""Please review the following {file_extension} code file and provide constructive feedback.
+        base_prompt = f"""Please review the following {file_extension} code file and provide constructive feedback.
 Focus on:
 - Code quality and best practices
 - Potential bugs or security issues
 - Performance considerations
 - Readability and maintainability
-- Adherence to coding standards
+- Adherence to coding standards"""
+
+        if custom_instructions:
+            base_prompt += f"""
+
+Additional project-specific requirements:
+{custom_instructions}"""
+
+        return f"""{base_prompt}
 
 File: {path}
 

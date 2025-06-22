@@ -1,0 +1,47 @@
+# Scalable multi-instance deployment using external configuration files
+# This approach uses separate .env files for each instance
+
+version: '3.8'
+
+services:
+  # Python専用インスタンス
+  reviewbot-llm-python:
+    build: .
+    container_name: reviewbot-llm-python
+    env_file:
+      - python-config.env
+    depends_on:
+      - redis
+    restart: unless-stopped
+
+  # C++専用インスタンス
+  reviewbot-llm-cpp:
+    build: .
+    container_name: reviewbot-llm-cpp
+    env_file:
+      - cpp-config.env
+    depends_on:
+      - redis
+    restart: unless-stopped
+
+  # ROS2専用インスタンス
+  reviewbot-llm-ros2:
+    build: .
+    container_name: reviewbot-llm-ros2
+    env_file:
+      - ros2-config.env
+    depends_on:
+      - redis
+    restart: unless-stopped
+
+  # 共有Redisサービス
+  redis:
+    image: redis:alpine
+    container_name: reviewbot-redis
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+
+networks:
+  default:
+    name: reviewbot-network

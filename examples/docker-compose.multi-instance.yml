@@ -1,0 +1,118 @@
+# Multiple ReviewBot LLM instances with different configurations
+# Each instance can use different models and custom settings
+
+version: '3.8'
+
+services:
+  # Instance 1: Python専用レビューボット (OpenWebUI + GPT-4)
+  reviewbot-llm-python:
+    build: .
+    container_name: reviewbot-llm-python
+    environment:
+      # Backend and model configuration
+      - REVIEWBOT_LLM_BACKEND=openwebui
+      - REVIEWBOT_LLM_OPENWEBUI_URL=http://host.docker.internal:3000
+      - REVIEWBOT_LLM_OPENWEBUI_API_KEY=${OPENWEBUI_API_KEY}
+      - REVIEWBOT_LLM_MODEL_NAME=gpt-4
+      - REVIEWBOT_LLM_MAX_TOKENS=1500
+      - REVIEWBOT_LLM_TEMPERATURE=0.1
+      
+      # Python-specific custom instructions
+      - REVIEWBOT_LLM_CUSTOM_INSTRUCTIONS=Python専用レビュー設定：PEP 8準拠、型ヒント必須、docstring必須、セキュリティチェック重視、パフォーマンス最適化提案
+      
+      # Review Board configuration
+      - REVIEWBOARD_URL=${REVIEWBOARD_URL}
+      - REVIEWBOARD_USERNAME=reviewbot-python
+      - REVIEWBOARD_PASSWORD=${REVIEWBOARD_PASSWORD}
+      
+    depends_on:
+      - redis
+    restart: unless-stopped
+
+  # Instance 2: C++専用レビューボット (llamacpp + Code Llama)
+  reviewbot-llm-cpp:
+    build: .
+    container_name: reviewbot-llm-cpp
+    environment:
+      # Backend and model configuration
+      - REVIEWBOT_LLM_BACKEND=llamacpp
+      - REVIEWBOT_LLM_LLAMACPP_URL=http://host.docker.internal:8080
+      - REVIEWBOT_LLM_LLAMACPP_API_KEY=${LLAMACPP_API_KEY}
+      - REVIEWBOT_LLM_MODEL_NAME=codellama-13b
+      - REVIEWBOT_LLM_MAX_TOKENS=2000
+      - REVIEWBOT_LLM_TEMPERATURE=0.05
+      
+      # C++-specific custom instructions
+      - REVIEWBOT_LLM_CUSTOM_INSTRUCTIONS=C++専用レビュー設定：RAII原則、スマートポインタ使用、const correctness、メモリリーク防止、パフォーマンス重視、Modern C++標準準拠
+      
+      # Review Board configuration
+      - REVIEWBOARD_URL=${REVIEWBOARD_URL}
+      - REVIEWBOARD_USERNAME=reviewbot-cpp
+      - REVIEWBOARD_PASSWORD=${REVIEWBOARD_PASSWORD}
+      
+    depends_on:
+      - redis
+    restart: unless-stopped
+
+  # Instance 3: ROS2専用レビューボット (OpenWebUI + Llama2)
+  reviewbot-llm-ros2:
+    build: .
+    container_name: reviewbot-llm-ros2
+    environment:
+      # Backend and model configuration
+      - REVIEWBOT_LLM_BACKEND=openwebui
+      - REVIEWBOT_LLM_OPENWEBUI_URL=http://host.docker.internal:3000
+      - REVIEWBOT_LLM_OPENWEBUI_API_KEY=${OPENWEBUI_API_KEY}
+      - REVIEWBOT_LLM_MODEL_NAME=llama2-70b
+      - REVIEWBOT_LLM_MAX_TOKENS=1200
+      - REVIEWBOT_LLM_TEMPERATURE=0.2
+      
+      # ROS2-specific custom instructions
+      - REVIEWBOT_LLM_CUSTOM_INSTRUCTIONS=ROS2専用レビュー設定：ノード名snake_case、トピック名小文字、QoSプロファイル適切設定、ライフサイクル管理、パラメータ設定、エラーハンドリング重視
+      
+      # Review Board configuration
+      - REVIEWBOARD_URL=${REVIEWBOARD_URL}
+      - REVIEWBOARD_USERNAME=reviewbot-ros2
+      - REVIEWBOARD_PASSWORD=${REVIEWBOARD_PASSWORD}
+      
+    depends_on:
+      - redis
+    restart: unless-stopped
+
+  # Instance 4: 汎用レビューボット (llamacpp + Mixtral)
+  reviewbot-llm-general:
+    build: .
+    container_name: reviewbot-llm-general
+    environment:
+      # Backend and model configuration
+      - REVIEWBOT_LLM_BACKEND=llamacpp
+      - REVIEWBOT_LLM_LLAMACPP_URL=http://host.docker.internal:8081
+      - REVIEWBOT_LLM_LLAMACPP_API_KEY=${LLAMACPP_API_KEY}
+      - REVIEWBOT_LLM_MODEL_NAME=mixtral-8x7b
+      - REVIEWBOT_LLM_MAX_TOKENS=1000
+      - REVIEWBOT_LLM_TEMPERATURE=0.3
+      
+      # General custom instructions
+      - REVIEWBOT_LLM_CUSTOM_INSTRUCTIONS=汎用レビュー設定：コード品質、可読性、保守性、セキュリティ、パフォーマンス、ベストプラクティス準拠を総合的にチェック
+      
+      # Review Board configuration
+      - REVIEWBOARD_URL=${REVIEWBOARD_URL}
+      - REVIEWBOARD_USERNAME=reviewbot-general
+      - REVIEWBOARD_PASSWORD=${REVIEWBOARD_PASSWORD}
+      
+    depends_on:
+      - redis
+    restart: unless-stopped
+
+  # Shared Redis service
+  redis:
+    image: redis:alpine
+    container_name: reviewbot-redis
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+
+# Optional: Network configuration for isolation
+networks:
+  default:
+    name: reviewbot-network

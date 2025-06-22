@@ -1,140 +1,140 @@
-# ReviewBot LLM Extension
+# ReviewBot LLM拡張機能
 
-A ReviewBot extension that performs automated code reviews using local Large Language Models (LLMs) through OpenWebUI or llamacpp.
+OpenWebUIやllamacppを通じてローカル大規模言語モデル（LLM）を使用して自動コードレビューを実行するReviewBot拡張機能です。
 
-## Features
+## 機能
 
-- Support for both OpenWebUI HTTP API and llamacpp local execution
-- Configurable backend selection
-- Comprehensive code review prompts
-- JSON-structured review responses
-- Support for multiple programming languages (Python, JavaScript, TypeScript, Java, C/C++, Go, Rust, Ruby, PHP)
-- Configurable temperature and token limits
-- Error handling for network issues and model loading failures
+- OpenWebUI HTTP APIとllamacppローカル実行の両方をサポート
+- 設定可能なバックエンド選択
+- 包括的なコードレビュープロンプト
+- JSON構造化されたレビュー応答
+- 複数のプログラミング言語をサポート（Python、JavaScript、TypeScript、Java、C/C++、Go、Rust、Ruby、PHP）
+- 設定可能な温度とトークン制限
+- ネットワーク問題とモデル読み込み失敗のエラーハンドリング
 
-## Installation
+## インストール
 
-### Docker Installation (Recommended)
+### Dockerインストール（推奨）
 
-The easiest way to use the ReviewBot LLM extension is with Docker, extending the official `beanbag/reviewbot-base` image:
+ReviewBot LLM拡張機能を使用する最も簡単な方法は、公式の`beanbag/reviewbot-base`イメージを拡張したDockerを使用することです：
 
 ```bash
-# Clone the repository
+# リポジトリをクローン
 git clone https://github.com/y1618/reviewbot-llm-extension.git
 cd reviewbot-llm-extension
 
-# Build the Docker image
+# Dockerイメージをビルド
 docker build -t reviewbot-llm .
 
-# Run with docker-compose (includes OpenWebUI and Ollama)
+# docker-composeで実行
 docker-compose up -d
 ```
 
-### Manual Installation
+### 手動インストール
 
-1. Clone this repository:
+1. このリポジトリをクローン：
 ```bash
 git clone https://github.com/y1618/reviewbot-llm-extension.git
 cd reviewbot-llm-extension
 ```
 
-2. Install the extension:
+2. 拡張機能をインストール：
 ```bash
 pip install -e .
 ```
 
-## Configuration
+## 設定
 
-Configure the tool in Review Board with the following options:
+Review Boardで以下のオプションを使用してツールを設定します：
 
-### Backend Selection
-- **Backend**: Choose between 'openwebui' or 'llamacpp'
+### バックエンド選択
+- **Backend**: 'openwebui'または'llamacpp'を選択
 
-### OpenWebUI Configuration
-- **OpenWebUI URL**: Server URL (default: http://localhost:3000)
-- **OpenWebUI API Key**: Optional API key for authentication
-- **Model Name**: Model name available in your OpenWebUI instance
+### OpenWebUI設定
+- **OpenWebUI URL**: サーバーURL（デフォルト: http://localhost:3000）
+- **OpenWebUI API Key**: 認証用のオプションAPIキー
+- **Model Name**: OpenWebUIインスタンスで利用可能なモデル名
 
-### llamacpp Configuration
-- **Model Name**: Full path to your GGUF model file (e.g., `/path/to/model.gguf`)
+### llamacpp設定
+- **Model Name**: GGUFモデルファイルへのフルパス（例：`/path/to/model.gguf`）
 
-### General Settings
-- **Max Tokens**: Maximum tokens for LLM response (default: 1000)
-- **Temperature**: Temperature for LLM response (0.0-1.0, lower = more focused, default: 0.1)
-- **Custom Instructions**: Project-specific coding rules and guidelines for the LLM to follow (optional)
+### 一般設定
+- **Max Tokens**: LLM応答の最大トークン数（デフォルト: 1000）
+- **Temperature**: LLM応答の温度（0.0-1.0、低いほど集中的、デフォルト: 0.1）
+- **Custom Instructions**: LLMが従うプロジェクト固有のコーディングルールとガイドライン（オプション）
 
-## Docker Configuration
+## Docker設定
 
-### Basic Setup (External OpenWebUI/Ollama)
+### 基本セットアップ（外部OpenWebUI/Ollama）
 
-The default Docker setup includes only:
+デフォルトのDocker設定には以下のみが含まれます：
 
-- **reviewbot-llm**: Main ReviewBot container with LLM extension
-- **redis**: Message broker for ReviewBot
+- **reviewbot-llm**: LLM拡張機能を含むメインReviewBotコンテナ
+- **redis**: ReviewBot用メッセージブローカー
 
-This setup assumes you're running OpenWebUI and Ollama separately on your host system.
+この設定では、OpenWebUIとOllamaをホストシステムで別途実行していることを前提としています。
 
-### Environment Variables
+### 環境変数
 
-Configure the LLM extension using environment variables:
+環境変数を使用してLLM拡張機能を設定します：
 
 ```bash
-# Backend selection
-REVIEWBOT_LLM_BACKEND=openwebui  # or 'llamacpp'
+# バックエンド選択
+REVIEWBOT_LLM_BACKEND=openwebui  # または 'llamacpp'
 
-# OpenWebUI configuration (external)
+# OpenWebUI設定（外部）
 REVIEWBOT_LLM_OPENWEBUI_URL=http://host.docker.internal:3000
-REVIEWBOT_LLM_OPENWEBUI_API_KEY=your_api_key_here  # Optional
+REVIEWBOT_LLM_OPENWEBUI_API_KEY=your_api_key_here  # オプション
 REVIEWBOT_LLM_MODEL_NAME=llama2
 REVIEWBOT_LLM_MAX_TOKENS=1000
 REVIEWBOT_LLM_TEMPERATURE=0.1
-REVIEWBOT_LLM_CUSTOM_INSTRUCTIONS="Follow PEP 8 for Python code. Use meaningful variable names."  # Optional
+REVIEWBOT_LLM_CUSTOM_INSTRUCTIONS="PythonコードはPEP 8に従う。意味のある変数名を使用する。"  # オプション
 ```
 
-### Deployment Options
+### デプロイメントオプション
 
-#### Option 1: External OpenWebUI/Ollama (Recommended)
+#### オプション1: 外部OpenWebUI/Ollama（推奨）
 ```bash
-# Start your OpenWebUI and Ollama separately
-# Then run ReviewBot LLM extension
+# OpenWebUIとOllamaを別途起動
+# その後ReviewBot LLM拡張機能を実行
 docker-compose up -d
 ```
 
-#### Option 2: Full Stack (All-in-One)
-Uncomment the OpenWebUI and Ollama services in docker-compose.yml:
+#### オプション2: フルスタック（オールインワン）
+docker-compose.ymlのOpenWebUIとOllamaサービスのコメントを外す：
 ```bash
-# Edit docker-compose.yml to uncomment OpenWebUI/Ollama services
+# docker-compose.ymlを編集してOpenWebUI/Ollamaサービスのコメントを外す
 docker-compose up -d
 ```
 
-### Service Access
+### サービスアクセス
 
-- **Redis**: Message broker at localhost:6379
-- **OpenWebUI**: Your external instance (typically http://localhost:3000)
-- **Ollama**: Your external instance (typically http://localhost:11434)
+- **Redis**: localhost:6379のメッセージブローカー
+- **OpenWebUI**: 外部インスタンス（通常 http://localhost:3000）
+- **Ollama**: 外部インスタンス（通常 http://localhost:11434）
 
-## Supported Environments
+## サポート環境
 
-- **SCM**: Git, Subversion, Mercurial (SCM-independent design)
-- **Languages**: Python, JavaScript, TypeScript, Java, C/C++, Go, Rust, Ruby, PHP
-- **Frameworks**: ROS2, standard Python projects
-- **Deployment**: Docker, bare metal, cloud environments
+- **SCM**: Git、Subversion、Mercurial（SCM非依存設計）
+- **言語**: Python、JavaScript、TypeScript、Java、C/C++、Go、Rust、Ruby、PHP
+- **フレームワーク**: ROS2、標準Pythonプロジェクト
+- **デプロイメント**: Docker、ベアメタル、クラウド環境
 
-## Requirements
+## 要件
 
 - ReviewBot
-- requests (for OpenWebUI integration)
-- llama-cpp-python (for local llamacpp execution)
-- Docker and docker-compose (for containerized deployment)
+- requests（OpenWebUI統合用）
+- llama-cpp-python（ローカルllamacpp実行用）
+- DockerとDocker Compose（コンテナ化デプロイメント用）
 
-## Usage
+## 使用方法
 
-1. Install and configure the extension in Review Board
-2. Add the LLM Code Review tool to your review requests
-3. The tool will automatically analyze code files and provide review comments
-4. Comments will appear as regular review comments in Review Board
+1. Review Boardで拡張機能をインストールして設定
+2. レビューリクエストにLLM Code Reviewツールを追加
+3. ツールが自動的にコードファイルを分析してレビューコメントを提供
+4. コメントはReview Boardの通常のレビューコメントとして表示
 
-## Supported File Types
+## サポートファイルタイプ
 
 - Python (*.py)
 - JavaScript (*.js)
@@ -146,46 +146,46 @@ docker-compose up -d
 - Ruby (*.rb)
 - PHP (*.php)
 
-## Backend Details
+## バックエンド詳細
 
 ### OpenWebUI
-- Uses HTTP API calls to your OpenWebUI instance
-- Supports both OpenAI-compatible (`/v1/chat/completions`) and native (`/api/chat`) endpoints
-- Automatic fallback between endpoints
-- Optional API key authentication
+- OpenWebUIインスタンスへのHTTP API呼び出しを使用
+- OpenAI互換（`/v1/chat/completions`）とネイティブ（`/api/chat`）エンドポイントの両方をサポート
+- エンドポイント間の自動フォールバック
+- オプションAPIキー認証
 
 ### llamacpp
-- Direct local execution using llama-cpp-python
-- Model caching for performance
-- Configurable context size and threading
-- Supports GGUF model format
+- llama-cpp-pythonを使用した直接ローカル実行
+- パフォーマンス向上のためのモデルキャッシュ
+- 設定可能なコンテキストサイズとスレッド
+- GGUFモデル形式をサポート
 
-## Error Handling
+## エラーハンドリング
 
-The extension includes comprehensive error handling for:
-- Network connectivity issues (OpenWebUI)
-- Model loading failures (llamacpp)
-- Invalid JSON responses
-- File encoding issues
-- API authentication errors
+拡張機能には以下の包括的なエラーハンドリングが含まれています：
+- ネットワーク接続問題（OpenWebUI）
+- モデル読み込み失敗（llamacpp）
+- 無効なJSON応答
+- ファイルエンコーディング問題
+- API認証エラー
 
-## Development
+## 開発
 
-To contribute to this project:
+このプロジェクトに貢献するには：
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests if applicable
-5. Submit a pull request
+1. リポジトリをフォーク
+2. フィーチャーブランチを作成
+3. 変更を加える
+4. 該当する場合はテストを追加
+5. プルリクエストを送信
 
-## License
+## ライセンス
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+このプロジェクトはMITライセンスの下でライセンスされています - 詳細はLICENSEファイルを参照してください。
 
-## Support
+## サポート
 
-For issues and questions:
-- Open an issue on GitHub
-- Check the ReviewBot documentation
-- Verify your OpenWebUI or llamacpp setup
+問題や質問については：
+- GitHubでissueを開く
+- ReviewBotドキュメントを確認
+- OpenWebUIまたはllamacppの設定を確認

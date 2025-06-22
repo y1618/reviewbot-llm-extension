@@ -9,10 +9,14 @@ setup(
     url='https://github.com/y1618/reviewbot-llm-extension',
     packages=find_packages(),
     install_requires=[
-        'reviewbot',
         'requests',
         'llama-cpp-python',
     ],
+    extras_require={
+        'dev': [
+            'reviewbot',
+        ],
+    },
     entry_points={
         'reviewbot.tools': [
             'llm = reviewbot_llm.llm_tool:LLMTool',

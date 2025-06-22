@@ -9,10 +9,12 @@ services:
       - REVIEWBOT_BROKER_URL=redis://redis:6379/0
       - REVIEWBOT_RESULT_BACKEND=redis://redis:6379/0
       
-      # LLM Extension configuration - connect to external OpenWebUI
-      - REVIEWBOT_LLM_BACKEND=openwebui
+      # LLM Extension configuration - connect to external services
+      - REVIEWBOT_LLM_BACKEND=openwebui  # or 'llamacpp'
       - REVIEWBOT_LLM_OPENWEBUI_URL=http://host.docker.internal:3000
       - REVIEWBOT_LLM_OPENWEBUI_API_KEY=your_api_key_here
+      - REVIEWBOT_LLM_LLAMACPP_URL=http://host.docker.internal:8080
+      - REVIEWBOT_LLM_LLAMACPP_API_KEY=your_llamacpp_api_key_here
       - REVIEWBOT_LLM_MODEL_NAME=llama2
       - REVIEWBOT_LLM_MAX_TOKENS=1000
       - REVIEWBOT_LLM_TEMPERATURE=0.1

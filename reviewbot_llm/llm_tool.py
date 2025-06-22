@@ -3,12 +3,6 @@ import logging
 import requests
 from reviewbot.tools.base import BaseTool
 
-try:
-    from llama_cpp import Llama
-    LLAMACPP_AVAILABLE = True
-except ImportError:
-    LLAMACPP_AVAILABLE = False
-
 
 class LLMTool(BaseTool):
     name = 'LLM Code Review'
@@ -23,7 +17,7 @@ class LLMTool(BaseTool):
             'field_options': {
                 'choices': [
                     ('openwebui', 'OpenWebUI HTTP API'),
-                    ('llamacpp', 'llamacpp Local Execution'),
+                    ('llamacpp', 'llamacpp Remote Server'),
                 ],
                 'help_text': 'Choose the LLM backend to use for code reviews',
             },
@@ -50,7 +44,24 @@ class LLMTool(BaseTool):
             'field_type': 'django.forms.CharField',
             'default': 'llama2',
             'field_options': {
-                'help_text': 'Model name for OpenWebUI or path to model file for llamacpp',
+                'help_text': 'Model name for OpenWebUI or llamacpp server',
+            },
+        },
+        {
+            'name': 'llamacpp_url',
+            'field_type': 'django.forms.CharField',
+            'default': 'http://localhost:8080',
+            'field_options': {
+                'help_text': 'llamacpp server URL (used when backend is llamacpp)',
+            },
+        },
+        {
+            'name': 'llamacpp_api_key',
+            'field_type': 'django.forms.CharField',
+            'default': '',
+            'field_options': {
+                'help_text': 'llamacpp server API key (optional)',
+                'required': False,
             },
         },
         {
@@ -208,32 +219,56 @@ Important: Only include specific, actionable feedback. If the code looks good, y
             return data['message']['content']
 
     def _call_llamacpp(self, prompt):
-        """Call llamacpp for local code review."""
-        if not LLAMACPP_AVAILABLE:
-            raise ImportError("llama-cpp-python is not installed")
-            
-        model_path = self.settings.get('model_name')
+        """Call remote llamacpp server for code review."""
+        url = self.settings.get('llamacpp_url', 'http://localhost:8080')
+        api_key = self.settings.get('llamacpp_api_key', '')
+        model_name = self.settings.get('model_name', 'llama2')
         max_tokens = self.settings.get('max_tokens', 1000)
         temperature = self.settings.get('temperature', 0.1)
         
-        if not hasattr(self, '_llama_model') or self._model_path != model_path:
-            self._llama_model = Llama(
-                model_path=model_path,
-                n_ctx=4096,
-                n_threads=4,
-                verbose=False
-            )
-            self._model_path = model_path
+        headers = {'Content-Type': 'application/json'}
+        if api_key:
+            headers['Authorization'] = f'Bearer {api_key}'
             
-        response = self._llama_model.create_chat_completion(
-            messages=[
-                {"role": "user", "content": prompt}
+        payload = {
+            'model': model_name,
+            'messages': [
+                {'role': 'user', 'content': prompt}
             ],
-            max_tokens=max_tokens,
-            temperature=temperature,
-        )
+            'max_tokens': max_tokens,
+            'temperature': temperature,
+        }
         
-        return response['choices'][0]['message']['content']
+        try:
+            response = requests.post(
+                f"{url}/v1/chat/completions",
+                headers=headers,
+                json=payload,
+                timeout=120
+            )
+            response.raise_for_status()
+            
+            data = response.json()
+            return data['choices'][0]['message']['content']
+            
+        except requests.exceptions.RequestException:
+            payload = {
+                'prompt': prompt,
+                'n_predict': max_tokens,
+                'temperature': temperature,
+                'stop': ['</s>', '\n\n'],
+            }
+            
+            response = requests.post(
+                f"{url}/completion",
+                headers=headers,
+                json=payload,
+                timeout=120
+            )
+            response.raise_for_status()
+            
+            data = response.json()
+            return data.get('content', '')
     
     def _process_llm_response(self, response, f, path):
         """Parse LLM response and add review comments."""

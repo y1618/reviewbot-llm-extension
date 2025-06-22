@@ -56,7 +56,9 @@ Review Boardで以下のオプションを使用してツールを設定しま�
 - **Model Name**: OpenWebUIインスタンスで利用可能なモデル名
 
 ### llamacpp設定
-- **Model Name**: GGUFモデルファイルへのフルパス（例：`/path/to/model.gguf`）
+- **llamacpp URL**: llamacppサーバーURL（デフォルト: http://localhost:8080）
+- **llamacpp API Key**: 認証用のオプションAPIキー
+- **Model Name**: llamacppサーバーで利用可能なモデル名
 
 ### 一般設定
 - **Max Tokens**: LLM応答の最大トークン数（デフォルト: 1000）
@@ -85,6 +87,12 @@ REVIEWBOT_LLM_BACKEND=openwebui  # または 'llamacpp'
 # OpenWebUI設定（外部）
 REVIEWBOT_LLM_OPENWEBUI_URL=http://host.docker.internal:3000
 REVIEWBOT_LLM_OPENWEBUI_API_KEY=your_api_key_here  # オプション
+
+# llamacpp設定（外部）
+REVIEWBOT_LLM_LLAMACPP_URL=http://host.docker.internal:8080
+REVIEWBOT_LLM_LLAMACPP_API_KEY=your_llamacpp_api_key_here  # オプション
+
+# 共通設定
 REVIEWBOT_LLM_MODEL_NAME=llama2
 REVIEWBOT_LLM_MAX_TOKENS=1000
 REVIEWBOT_LLM_TEMPERATURE=0.1
@@ -93,9 +101,9 @@ REVIEWBOT_LLM_CUSTOM_INSTRUCTIONS="PythonコードはPEP 8に従う。意味の�
 
 ### デプロイメントオプション
 
-#### オプション1: 外部OpenWebUI/Ollama（推奨）
+#### オプション1: 外部LLMサーバー（推奨）
 ```bash
-# OpenWebUIとOllamaを別途起動
+# OpenWebUI、Ollama、llamacppサーバーを別途起動
 # その後ReviewBot LLM拡張機能を実行
 docker-compose up -d
 ```
@@ -112,6 +120,7 @@ docker-compose up -d
 - **Redis**: localhost:6379のメッセージブローカー
 - **OpenWebUI**: 外部インスタンス（通常 http://localhost:3000）
 - **Ollama**: 外部インスタンス（通常 http://localhost:11434）
+- **llamacpp**: 外部インスタンス（通常 http://localhost:8080）
 
 ## サポート環境
 
@@ -123,9 +132,9 @@ docker-compose up -d
 ## 要件
 
 - ReviewBot
-- requests（OpenWebUI統合用）
-- llama-cpp-python（ローカルllamacpp実行用）
+- requests（OpenWebUIとllamacpp統合用）
 - DockerとDocker Compose（コンテナ化デプロイメント用）
+- 外部LLMサーバー（OpenWebUI、Ollama、llamacpp等）
 
 ## 使用方法
 
@@ -155,16 +164,16 @@ docker-compose up -d
 - オプションAPIキー認証
 
 ### llamacpp
-- llama-cpp-pythonを使用した直接ローカル実行
-- パフォーマンス向上のためのモデルキャッシュ
-- 設定可能なコンテキストサイズとスレッド
-- GGUFモデル形式をサポート
+- 外部llamacppサーバーへのHTTP API呼び出しを使用
+- OpenAI互換（`/v1/chat/completions`）とネイティブ（`/completion`）エンドポイントの両方をサポート
+- エンドポイント間の自動フォールバック
+- オプションAPIキー認証
 
 ## エラーハンドリング
 
 拡張機能には以下の包括的なエラーハンドリングが含まれています：
-- ネットワーク接続問題（OpenWebUI）
-- モデル読み込み失敗（llamacpp）
+- ネットワーク接続問題（OpenWebUI、llamacpp）
+- サーバー応答エラー（OpenWebUI、llamacpp）
 - 無効なJSON応答
 - ファイルエンコーディング問題
 - API認証エラー
@@ -188,4 +197,4 @@ docker-compose up -d
 問題や質問については：
 - GitHubでissueを開く
 - ReviewBotドキュメントを確認
-- OpenWebUIまたはllamacppの設定を確認
+- OpenWebUI、Ollama、またはllamacppサーバーの設定を確認
